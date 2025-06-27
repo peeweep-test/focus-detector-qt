@@ -31,7 +31,7 @@ protected:
     // 重写事件处理函数来检测焦点变化
     void focusInEvent(QFocusEvent *event) override;
     void focusOutEvent(QFocusEvent *event) override;
-    void changeEvent(QEvent *event) override;
+    //void changeEvent(QEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
 
 private slots:

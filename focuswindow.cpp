@@ -197,16 +197,8 @@ void FocusWindow::setupUI()
 
 void FocusWindow::updateBackgroundColor()
 {
-    QString bgColor = m_hasFocus ? "#E3F2FD" : "#FFFFFF";  // 浅蓝色 : 白色
-    QString borderColor = m_hasFocus ? "#2196F3" : "#CCCCCC";
-    
-    setStyleSheet(QString(
-        "FocusWindow { "
-        "    background-color: %1; "
-        "    border: 2px solid %2; "
-        "    border-radius: 10px; "
-        "}")
-        .arg(bgColor, borderColor));
+    QString bgColor = m_hasFocus ? "#E6F3FF" : "white";
+    setStyleSheet(QString("FocusWindow { background-color: %1; }").arg(bgColor));
 }
 
 void FocusWindow::updateFocusStatus()
@@ -251,20 +243,20 @@ void FocusWindow::focusOutEvent(QFocusEvent *event)
     }
 }
 
-void FocusWindow::changeEvent(QEvent *event)
-{
-    if (event->type() == QEvent::ActivationChange) {
-        bool isActive = isActiveWindow();
-        if (isActive != m_hasFocus) {
-            if (isActive && m_globalFocusManager) {
-                m_globalFocusManager->recordFocusGained(m_windowId);
-            } else if (!isActive && m_globalFocusManager) {
-                m_globalFocusManager->recordFocusLost(m_windowId);
-            }
-        }
-    }
-    QWidget::changeEvent(event);
-}
+// void FocusWindow::changeEvent(QEvent *event)
+// {
+//     if (event->type() == QEvent::ActivationChange) {
+//         bool isActive = isActiveWindow();
+//         if (isActive != m_hasFocus) {
+//             if (isActive && m_globalFocusManager) {
+//                 m_globalFocusManager->recordFocusGained(m_windowId);
+//             } else if (!isActive && m_globalFocusManager) {
+//                 m_globalFocusManager->recordFocusLost(m_windowId);
+//             }
+//         }
+//     }
+//     QWidget::changeEvent(event);
+// }
 
 void FocusWindow::closeEvent(QCloseEvent *event)
 {
@@ -342,16 +334,21 @@ QString FocusWindow::formatTimeDifference(qint64 milliseconds)
 
 void FocusWindow::calculateAndShowTimeDiff()
 {
-    // 计算时间差：窗口获得焦点时间 - 全局最后失去焦点时间
+    // 计算时间差：只有当应用完全失去焦点后重新获得焦点时才显示时间差
     if (m_globalFocusManager && !m_focusGainedTime.isNull()) {
-        QDateTime lastFocusLostTime = m_globalFocusManager->getLastFocusLostTime();
-        
-        if (!lastFocusLostTime.isNull()) {
+        // 检查是否应该显示时间差
+        if (m_globalFocusManager->shouldShowTimeDiff(m_focusGainedTime)) {
+            QDateTime lastFocusLostTime = m_globalFocusManager->getLastFocusLostTime();
+            
             qint64 timeDiff = calculateTimeDifference(lastFocusLostTime, m_focusGainedTime);
             QString timeDiffText = formatTimeDifference(timeDiff);
             
-            // 在UI中显示时间差
-            m_timeDiffEdit->setText(timeDiffText);
+            // 格式化失去焦点的时间
+            QString lostTimeString = lastFocusLostTime.toString("hh:mm:ss.zzz");
+            
+            // 在UI中显示时间差和失去焦点时间
+            QString displayText = QString("%1\n(失焦时间: %2)").arg(timeDiffText, lostTimeString);
+            m_timeDiffEdit->setText(displayText);
             
             // 根据时间差设置颜色
             QString colorStyle;
@@ -371,19 +368,23 @@ void FocusWindow::calculateAndShowTimeDiff()
                 "    font-weight: bold;"
                 "}").arg(colorStyle));
             
-            // 在日志中输出时间差
-            qDebug() << QString("[%1] 窗口 %2 焦点切换耗时: %3 (%4毫秒)")
-                        .arg(m_focusGainedTimeString, m_windowId, timeDiffText).arg(timeDiff);
+            // 在日志中输出时间差和失去焦点时间
+            qDebug() << QString("[%1] 窗口 %2 应用重新获得焦点耗时: %3 (%4毫秒) - 失焦时间: %5")
+                        .arg(m_focusGainedTimeString, m_windowId, timeDiffText).arg(timeDiff).arg(lostTimeString);
         } else {
-            m_timeDiffEdit->setText("首次获得焦点");
+            // 应用内窗口切换，显示0
+            m_timeDiffEdit->setText("0毫秒 (应用内切换)");
             m_timeDiffEdit->setStyleSheet(
                 "QLineEdit {"
-                "    background-color: #E1F5FE;"
+                "    background-color: #F3E5F5;"
                 "    border: 1px solid #DDA0DD;"
                 "    border-radius: 3px;"
-                "    color: #0277BD;"
+                "    color: #7B1FA2;"
                 "    font-weight: bold;"
                 "}");
+            
+            qDebug() << QString("[%1] 窗口 %2 应用内窗口切换 (时间差: 0)")
+                        .arg(m_focusGainedTimeString, m_windowId);
         }
     }
 }
