@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Focus Detector Qt
+Name[zh_CN]=焦点检测器
+Comment=Qt6-based window focus detection and monitoring tool
+Comment[zh_CN]=基于Qt6的窗口焦点检测和监控工具
+Exec=focus-detector-qt
+Icon=focus-detector-qt
+Terminal=false
+Type=Application
+Categories=Development;Qt;Utility;
+Keywords=focus;window;monitor;detection;qt;
+StartupNotify=true
+MimeType= 

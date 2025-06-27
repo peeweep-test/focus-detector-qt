@@ -1,0 +1,12 @@
+Package: focus-detector-qt-dbgsym
+Source: focus-detector-qt
+Version: 1.0.0-1
+Auto-Built-Package: debug-symbols
+Architecture: amd64
+Maintainer: rewine <rewine@qq.com>
+Installed-Size: 624
+Depends: focus-detector-qt (= 1.0.0-1)
+Section: debug
+Priority: optional
+Description: debug symbols for focus-detector-qt
+Build-Ids: af19084502c4f10154eb98740261b7fc6e641503

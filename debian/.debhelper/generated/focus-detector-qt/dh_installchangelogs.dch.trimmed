@@ -1,0 +1,14 @@
+focus-detector-qt (1.0.0-1) unstable; urgency=medium
+
+  * Initial release.
+  * Qt6 Widgets-based window focus detection application
+  * Real-time focus state monitoring with visual feedback
+  * Precise timestamp recording (millisecond accuracy)
+  * Multi-window support with unified design
+  * Focus switch time difference calculation
+  * Comprehensive logging system
+  * Modern UI with background color changes based on focus state
+  * Support for unlimited window creation
+  * Cross-platform compatibility
+
+ -- rewine <rewine@qq.com>  Fri, 27 Dec 2024 16:06:27 +0800

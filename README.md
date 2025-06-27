@@ -70,26 +70,57 @@
 
 ## 使用说明
 
-### 1. 编译项目
+### 1. 快速开始
+```bash
+# 方式1: 使用Makefile (推荐)
+make build          # 构建项目
+make package        # 创建.deb安装包
+
+# 方式2: 使用脚本
+./quick_build.sh    # 快速构建
+./build_package.sh  # 构建debian包
+./cpack_build.sh    # 使用CPack构建包
+```
+
+### 2. 手动编译
 ```bash
 # 创建构建目录
 mkdir build
 cd build
 
 # 配置项目
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 
 # 编译项目
 make -j$(nproc)
 ```
 
-### 2. 运行应用程序
+### 3. 运行应用程序
 ```bash
-# 直接运行
-cd build && ./appfocus_detector_qt
+# 从构建目录运行
+cd build && ./focus-detector-qt
 
 # 或使用演示脚本
 ./run_demo.sh
+```
+
+### 4. 安装和打包
+
+#### 安装到系统
+```bash
+make install               # 安装到系统
+sudo dpkg -i ../focus-detector-qt_*.deb  # 安装deb包
+```
+
+#### 创建安装包
+```bash
+make package              # 创建debian包 (推荐)
+make package-cpack        # 使用CPack创建包
+```
+
+#### 清理构建文件
+```bash
+make clean               # 清理所有构建文件
 ```
 
 ### 3. 操作指南
@@ -186,6 +217,177 @@ protected:
 - **focusInEvent/focusOutEvent**: 处理控件焦点事件
 - **changeEvent(ActivationChange)**: 处理窗口激活状态变化
 - **双重检测**: 确保焦点变化被准确捕获
+
+## 🗂️ 打包说明
+
+### 打包方式对比
+
+| 方式 | 命令 | 输出 | 优势 | 适用场景 |
+|------|------|------|------|----------|
+| **Debian 打包** | `make package` | `.deb` 文件 | 标准Linux包管理 | 生产环境部署 |
+| **CPack 打包** | `make package-cpack` | `.deb` + `.tar.gz` | 跨平台支持 | 多平台分发 |
+| **源码包** | `make build` | 可执行文件 | 快速测试 | 开发调试 |
+
+### 详细打包步骤
+
+#### 1. 环境准备
+```bash
+# 安装构建依赖
+sudo apt update
+sudo apt install build-essential debhelper cmake qt6-base-dev qt6-base-dev-tools libqt6widgets6
+
+# 检查依赖
+./build_package.sh  # 会自动检查并提示缺少的依赖
+```
+
+#### 2. Debian包构建
+```bash
+# 方式1: 使用Makefile (推荐)
+make clean          # 清理之前的构建
+make package        # 构建debian包
+
+# 方式2: 直接使用脚本
+./build_package.sh  # 全功能脚本，包含依赖检查
+
+# 输出文件位置
+ls -la ../focus-detector-qt_*.deb
+```
+
+#### 3. CPack包构建
+```bash
+# 构建多种格式的包
+make package-cpack
+
+# 生成的文件
+ls -la build/focus-detector-qt-*.deb     # Debian包
+ls -la build/focus-detector-qt-*.tar.gz  # 压缩包
+```
+
+#### 4. 包安装测试
+```bash
+# 安装deb包
+sudo dpkg -i ../focus-detector-qt_*.deb
+
+# 修复依赖问题（如果有）
+sudo apt --fix-broken install
+
+# 卸载包
+sudo apt remove focus-detector-qt
+```
+
+### 包内容验证
+
+#### 查看包信息
+```bash
+# 查看包详细信息
+dpkg-deb --info ../focus-detector-qt_*.deb
+
+# 查看包内文件列表
+dpkg-deb --contents ../focus-detector-qt_*.deb
+
+# 检查包依赖
+dpkg-deb --field ../focus-detector-qt_*.deb Depends
+```
+
+#### 预期包内容
+```
+/usr/bin/focus-detector-qt          # 主程序
+/usr/bin/run_demo.sh                # 演示脚本
+/usr/share/doc/focus-detector-qt/   # 文档目录
+├── README.md                       # 使用说明
+├── DEMO.md                         # 演示文档
+└── copyright                       # 版权信息
+```
+
+### 自动化构建
+
+#### 使用Makefile
+```bash
+make help           # 查看所有可用命令
+make build          # 快速构建
+make test           # 测试运行
+make package        # 创建安装包
+make clean          # 清理构建文件
+make install        # 安装到系统
+```
+
+#### CI/CD 集成
+```bash
+# 在持续集成环境中
+./build_package.sh          # 检查依赖并构建
+echo $?                     # 检查构建状态
+ls -la ../focus-detector-qt_*.deb  # 验证输出
+```
+
+### 常见问题
+
+**Q: 构建时提示缺少Qt6依赖？**
+```bash
+# Ubuntu/Debian
+sudo apt install qt6-base-dev qt6-base-dev-tools libqt6widgets6
+
+# 检查Qt6安装
+qmake6 -query QT_VERSION
+```
+
+**Q: debian包构建失败？**
+```bash
+# 清理环境重试
+make clean
+rm -rf debian/.debhelper/
+./build_package.sh
+```
+
+**Q: 包安装后找不到程序？**
+```bash
+# 检查安装路径
+which focus-detector-qt
+dpkg -L focus-detector-qt | grep bin
+```
+
+### 版本管理
+
+当前版本信息在以下文件中定义：
+- `CMakeLists.txt`: `VERSION 1.0.0`
+- `debian/changelog`: 包版本历史
+- 构建脚本会自动从CMakeLists.txt读取版本号
+
+### 完整的打包工作流
+
+```bash
+# 1. 清理环境
+make clean
+
+# 2. 构建项目
+make build
+
+# 3. 测试运行
+make test
+
+# 4. 创建包
+make package
+
+# 5. 测试包
+make test-package
+
+# 6. 安装测试
+sudo dpkg -i ../focus-detector-qt_*.deb
+focus-detector-qt  # 运行程序
+
+# 7. 清理（可选）
+sudo apt remove focus-detector-qt
+```
+
+### 脚本功能总览
+
+| 脚本 | 功能 | 使用场景 |
+|------|------|----------|
+| `quick_build.sh` | 快速构建和测试 | 开发调试 |
+| `build_package.sh` | 完整的debian包构建 | 生产发布 |
+| `cpack_build.sh` | 使用CPack多格式打包 | 跨平台分发 |
+| `test_package.sh` | 验证生成的包 | 质量保证 |
+| `run_demo.sh` | 运行演示 | 用户体验 |
+| `Makefile` | 统一构建接口 | 自动化流程 |
 
 ## 扩展建议
 

@@ -1,0 +1,25 @@
+Package: focus-detector-qt
+Version: 1.0.0-1
+Architecture: amd64
+Maintainer: rewine <rewine@qq.com>
+Installed-Size: 64
+Depends: libc6 (>= 2.34), libgcc-s1 (>= 3.0), libqt6core6 (>= 6.8.0), libqt6gui6 (>= 6.1.2), libqt6widgets6 (>= 6.1.2), libstdc++6 (>= 5)
+Section: utils
+Priority: optional
+Homepage: https://github.com/rewine/focus_detector_qt
+Description: Qt6-based window focus detection and monitoring tool
+ Focus Detector Qt is a powerful window focus monitoring application built
+ with Qt6 Widgets and CMake. It provides real-time tracking and recording
+ of window focus state changes with millisecond precision.
+ .
+ Features:
+  * Real-time window focus state detection with visual feedback
+  * Precise timestamp recording (millisecond accuracy)
+  * Multi-window support with unified design
+  * Focus switch time difference calculation
+  * Comprehensive logging system
+  * Modern Qt6 Widgets-based interface
+ .
+ The application is ideal for developers, system administrators, and
+ anyone who needs to monitor window focus behavior for debugging,
+ analysis, or productivity tracking purposes.
