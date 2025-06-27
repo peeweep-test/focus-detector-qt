@@ -23,7 +23,7 @@ void FocusManager::recordFocusGained(const QString &windowId)
     // 更新当前有焦点的窗口和时间
     m_currentFocusedWindow = windowId;
     m_lastFocusGainTime = currentTime;
-    
+    m_focusedWindowCount++;
     emit focusChanged(windowId, true, timestamp);
 }
 
@@ -37,6 +37,7 @@ void FocusManager::recordFocusLost(const QString &windowId)
     // 清空当前有焦点的窗口ID并记录失去焦点时间
     m_currentFocusedWindow.clear();
     m_lastFocusLostTime = currentTime;
+    m_focusedWindowCount--;
     
     emit focusChanged(windowId, false, timestamp);
 }
@@ -59,9 +60,8 @@ bool FocusManager::shouldShowTimeDiff(const QDateTime &gainTime) const
     if (m_lastFocusLostTime.isNull()) {
         return false;
     }
-    
-    qint64 timeDiff = m_lastFocusLostTime.msecsTo(gainTime);
-    
-    // 显示所有时间差，包括小于100毫秒的情况
-    return timeDiff >= 0;
-} 
+    if (m_focusedWindowCount != 1) {
+        return false;
+    }
+    return true;
+}
