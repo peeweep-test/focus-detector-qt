@@ -10,6 +10,7 @@
 #include <QGroupBox>
 #include <QFrame>
 #include <QTimer>
+#include <QDateTime>
 #include "focusmanager.h"
 
 class FocusWindow : public QWidget
@@ -37,12 +38,16 @@ private slots:
     void onCreateNewWindow();
     void onCloseWindow();
     void onFocusChanged(const QString &winId, bool hasFocus, const QString &timestamp);
-    void onFocusSwitchTimeDiff(const QString &windowId, qint64 timeDiffMs, const QString &timeDiffText);
 
 private:
     void setupUI();
     void updateBackgroundColor();
     void updateFocusStatus();
+    
+    // 时间差计算的辅助方法
+    qint64 calculateTimeDifference(const QDateTime &fromTime, const QDateTime &toTime);
+    QString formatTimeDifference(qint64 milliseconds);
+    void calculateAndShowTimeDiff();
     
     // 成员变量
     QString m_windowId;
@@ -50,7 +55,10 @@ private:
     bool m_hasFocus;
     
     FocusManager *m_globalFocusManager;
-    FocusManager *m_localFocusManager;
+    
+    // 窗口自己的时间记录
+    QDateTime m_focusGainedTime;
+    QDateTime m_focusLostTime;
     
     // UI组件
     QVBoxLayout *m_mainLayout;
@@ -66,8 +74,8 @@ private:
     QPushButton *m_newWindowBtn;
     QPushButton *m_closeBtn;
     
-    QString m_focusGainedTime;
-    QString m_focusLostTime;
+    QString m_focusGainedTimeString;
+    QString m_focusLostTimeString;
 };
 
 #endif // FOCUSWINDOW_H 
